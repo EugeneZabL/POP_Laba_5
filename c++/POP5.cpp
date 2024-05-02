@@ -22,7 +22,7 @@ int main() {
 
 	init_arr();
 
-	omp_set_nested(2);
+	omp_set_nested(1);
 	double t1 = omp_get_wtime();
 #pragma omp parallel sections
 	{
@@ -72,7 +72,6 @@ int FindSum()
 int FindSum(int row)
 {
 	int sum = 0;
-#pragma omp parallel for reduction(+:sum) num_threads(2)
 	for (int j = 0; j < cols; j++)
 	{
 		sum = sum + MyArr[row][j];
@@ -85,7 +84,7 @@ return sum;
 int FindMin()
 {
 	int IndexOfMin = rows - 1;
-#pragma omp parallel for num_threads(Treadds/2)
+#pragma omp parallel for num_threads(Treadds)
 	for (int i = 0; i < rows; i++)
 	{
 		int t1 = FindSum(i);
