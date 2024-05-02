@@ -7,7 +7,7 @@ using namespace std;
 const int rows = 5000;
 const int cols = 5000;
 
-const int Treadds = 32;
+const int Treadds = 10;
 
 int MyArr[rows][cols];
 
@@ -22,7 +22,7 @@ int main() {
 
 	init_arr();
 
-	omp_set_nested(1);
+	omp_set_nested(2);
 	double t1 = omp_get_wtime();
 #pragma omp parallel sections
 	{
