@@ -4,8 +4,10 @@
 
 using namespace std;
 
-const int rows = 100;
-const int cols = 50;
+const int rows = 5000;
+const int cols = 5000;
+
+const int Treadds = 32;
 
 int MyArr[rows][cols];
 
@@ -20,43 +22,49 @@ int main() {
 
 	init_arr();
 
-	omp_set_nested(2);
+	omp_set_nested(1);
+	double t1 = omp_get_wtime();
 #pragma omp parallel sections
 	{
 #pragma omp section
 		{
-			std::cout << FindSum() << endl;
-			double t1 = omp_get_wtime();
-			cout << t1 << endl;
+			int d = FindSum();
+			double t2 = omp_get_wtime();
+
+#pragma omp critical
+			{
+				std::cout << d << endl;
+				cout << t2 - t1 << endl;
+			}
 		}
 
 #pragma omp section
 		{
-			int t = FindMin();
-			int tt = FindSum(t);
-			double t1 = omp_get_wtime(); 
+			int d = FindMin();
+			int dd = FindSum(d);
+			double t2 = omp_get_wtime();
 #pragma omp critical
 			{
-				cout << tt << endl;
-				cout << t << endl;
-				cout << t1 << endl;
+				cout << dd << endl;
+				cout << d << endl;
+				cout << t2 - t1 << endl;
 			}
 		}
 	}
-	return 0;
+	return 2;
 }
 
 int FindSum()
 {
 	int sum = 0;
-#pragma omp parallel for reduction(+:sum) num_threads(rows)
+#pragma omp parallel for reduction(+:sum) num_threads(Treadds)
 	for (int i = 0; i < rows; i++)
 	{
 		for (int j = 0; j < cols; j++)
 		{
 			sum = sum + MyArr[i][j];
 		}
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 	return sum;
 }
@@ -64,11 +72,10 @@ int FindSum()
 int FindSum(int row)
 {
 	int sum = 0;
-#pragma omp parallel for reduction(+:sum) num_threads(5)
+#pragma omp parallel for reduction(+:sum) num_threads(2)
 	for (int j = 0; j < cols; j++)
 	{
 		sum = sum + MyArr[row][j];
-		//std::this_thread::sleep_for(std::chrono::second(1));
 	}
 
 
@@ -78,7 +85,7 @@ return sum;
 int FindMin()
 {
 	int IndexOfMin = rows - 1;
-#pragma omp parallel for num_threads(rows)
+#pragma omp parallel for num_threads(Treadds/2)
 	for (int i = 0; i < rows; i++)
 	{
 		int t1 = FindSum(i);
@@ -95,6 +102,7 @@ int FindMin()
 				}
 			}
 		}
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 	return IndexOfMin;
 }
